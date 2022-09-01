@@ -349,7 +349,6 @@ public class Field : MonoBehaviour
     {
         int currentComboCounter = 1;
         solveCandidates.Clear();
-        Debug.Log("Y!!! " + blockY);
         BlockRow blockRow = blockRows.get(blockY).GetComponent<BlockRow>();
         Block block = blockRow.get(blockX).GetComponent<Block>();
         solveCandidates.Add(block.gameObject);

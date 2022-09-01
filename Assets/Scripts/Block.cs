@@ -91,4 +91,10 @@ public class Block : MonoBehaviour
         this.renderer = GetComponent<Renderer>();
         this.disable();
     }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 }
