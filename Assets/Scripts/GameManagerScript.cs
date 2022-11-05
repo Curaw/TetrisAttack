@@ -46,6 +46,6 @@ public class GameManagerScript : MonoBehaviour
 
     private void addRandomBlockRow()
     {
-        playingField.addRandomBlockRow();
+        playingField.addRandomBlockRowToBottom();
     }
 }
