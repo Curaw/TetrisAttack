@@ -5,6 +5,7 @@ using UnityEngine;
 public class Block : MonoBehaviour
 {
     [SerializeField] private BlockColor color;
+
     private Renderer renderer;
     private bool disabled;
     private int length;
@@ -89,11 +90,5 @@ public class Block : MonoBehaviour
     {
         this.renderer = GetComponent<Renderer>();
         this.disable();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }

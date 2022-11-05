@@ -88,7 +88,7 @@ public class Field : MonoBehaviour
     {
         GameObject newRowGO = GameObject.Instantiate(blockRowPrefab, Vector3.zero, transform.rotation, transform);
         newRowGO.AddComponent<BlockRow>();
-        newRowGO.GetComponent<BlockRow>().init(0, width);
+        newRowGO.GetComponent<BlockRow>().init(this, 0, width);
         return newRowGO;
     }
 
@@ -287,11 +287,11 @@ public class Field : MonoBehaviour
             return;
         }
 
-        blockRows.get(roundedY).GetComponent<BlockRow>().swap(roundedX);
-        handleBlockSolvingAtCursor(roundedX, roundedY);
+        blockRows.get(roundedY).GetComponent<BlockRow>().initSwap(roundedX);
+        //blockRows.get(roundedY).GetComponent<BlockRow>().swap(roundedX);
     }
 
-    private void handleBlockSolvingAtCursor(int posX, int posY)
+    public void handleBlockSolvingAfterSwap(int posX, int posY)
     {
         solvedBlocks.Clear();
         checkForSolvedBlocks(posX, posY);
@@ -349,6 +349,7 @@ public class Field : MonoBehaviour
     {
         int currentComboCounter = 1;
         solveCandidates.Clear();
+        Debug.Log("Y!!! " + blockY);
         BlockRow blockRow = blockRows.get(blockY).GetComponent<BlockRow>();
         Block block = blockRow.get(blockX).GetComponent<Block>();
         solveCandidates.Add(block.gameObject);
