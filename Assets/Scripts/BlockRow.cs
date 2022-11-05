@@ -11,6 +11,7 @@ public class BlockRow : MonoBehaviour
     private Field containingField;
     private GameObject[] data;
     private int posY = 0;
+    private int width = 0;
     private bool isSwapInProgress = false;
     private Block leftSwappingBlock, rightSwappingBlock;
     private int animationCounter = 0;
@@ -20,6 +21,7 @@ public class BlockRow : MonoBehaviour
     {
         this.containingField = field;
         this.posY = posY;
+        this.width = width;
         this.data = new GameObject[width];
     }
 
@@ -47,6 +49,11 @@ public class BlockRow : MonoBehaviour
     public int getPosY()
     {
         return this.posY;
+    }
+
+    public int getWidth()
+    {
+        return this.width;
     }
 
     public void swap(int index)
@@ -79,6 +86,11 @@ public class BlockRow : MonoBehaviour
 
     public void initSwap(int index)
     {
+        if(isSwapInProgress)
+        {
+            return;
+        }
+
         this.rightSwappingBlock = data[index].GetComponent<Block>();
         this.leftSwappingBlock = data[index + 1].GetComponent<Block>();
 

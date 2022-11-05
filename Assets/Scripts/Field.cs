@@ -40,6 +40,7 @@ public class Field : MonoBehaviour
             return;
         }
         blockRows.get(0).GetComponent<BlockRow>().activate();
+        handleBlockSolvingforRow(0);
     }
 
     public void shiftEverythingUp()
@@ -304,11 +305,15 @@ public class Field : MonoBehaviour
         }
         disableSolvedBlocks();
     }
-    private void handleBlockSolvingforRow(int posX, int posY)
+    private void handleBlockSolvingforRow(int posY)
     {
         solvedBlocks.Clear();
-        //TODO hier schleife ueber die reihe
-        checkForSolvedBlocks(posX, posY);
+        BlockRow row = blockRows.get(posY).GetComponent<BlockRow>();
+        for(int i = 0; i < row.getWidth(); i++)
+        {
+            checkForSolvedBlocks(i, posY);
+        }
+        solvedBlocks.Sort(compareBlockPositions);
         disableSolvedBlocks();
     }
 
