@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BlockRow : MonoBehaviour
 {
-    private const float ANIMATION_DELTA = 0.3f;
+    private const float ANIMATION_DELTA = 0.1f;
     private const float ANIMATION_OFFSET_X = 0.125f;
     private const int ANIMATION_STEPS = 8;
 
@@ -68,6 +68,10 @@ public class BlockRow : MonoBehaviour
         data[index].GetComponent<Block>().setX(index);
         data[index + 1].GetComponent<Block>().setX(index + 1);
 
+        //Enable blocks again
+        data[index].GetComponent<Block>().enable();
+        data[index + 1].GetComponent<Block>().enable();
+
         Debug.Log("neuer linker block: " + data[index].GetComponent<Block>().getX() + ", " + data[index].GetComponent<Block>().getY());
         Debug.Log("neuer rechter block: " + data[index + 1].GetComponent<Block>().getX() + ", " + data[index + 1].GetComponent<Block>().getY());
         this.containingField.handleBlockSolvingAfterSwap(index, this.posY);
@@ -77,6 +81,13 @@ public class BlockRow : MonoBehaviour
     {
         this.rightSwappingBlock = data[index].GetComponent<Block>();
         this.leftSwappingBlock = data[index + 1].GetComponent<Block>();
+
+        if(this.rightSwappingBlock.isDisabled() || this.leftSwappingBlock.isDisabled())
+        {
+            return;
+        }
+        this.rightSwappingBlock.disable();
+        this.leftSwappingBlock.disable();
         isSwapInProgress = true;
     }
 
@@ -94,6 +105,7 @@ public class BlockRow : MonoBehaviour
         for (int i = 0; i < data.Length; i++)
         {
             Block block = data[i].GetComponent<Block>();
+            block.removeGreyOut();
             block.enable();
         }
     }

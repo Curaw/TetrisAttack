@@ -74,21 +74,21 @@ public class Field : MonoBehaviour
         }
     }
 
-    public void addRandomBlockRow()
+    public void addRandomBlockRowToBottom()
     {
         removeTopBlockRow();
-        GameObject newBlockRow = createNewBlockRowGO();
+        GameObject newBlockRow = createNewBlockRowGO(-1);   //-1 because increaseBlockPositions sets the new row to 0.
         fillBlockRowWithRandomBlocks(newBlockRow);
         blockRows.addToBot(newBlockRow);
-        updateBlockPositions();
+        increaseBlockPositions();
         shiftControllerUp();
     }
 
-    private GameObject createNewBlockRowGO()
+    private GameObject createNewBlockRowGO(int yPos)
     {
         GameObject newRowGO = GameObject.Instantiate(blockRowPrefab, Vector3.zero, transform.rotation, transform);
         newRowGO.AddComponent<BlockRow>();
-        newRowGO.GetComponent<BlockRow>().init(this, 0, width);
+        newRowGO.GetComponent<BlockRow>().init(this, yPos, width);
         return newRowGO;
     }
 
@@ -207,7 +207,7 @@ public class Field : MonoBehaviour
         GameObject.Destroy(blockRows.get(blockRows.getSize() - 1));
     }
 
-    private void updateBlockPositions()
+    private void increaseBlockPositions()
     {
         GameObject blockRowGo;
         BlockRow blockRow;
@@ -349,7 +349,6 @@ public class Field : MonoBehaviour
     {
         int currentComboCounter = 1;
         solveCandidates.Clear();
-        Debug.Log("Y!!! " + blockY);
         BlockRow blockRow = blockRows.get(blockY).GetComponent<BlockRow>();
         Block block = blockRow.get(blockX).GetComponent<Block>();
         solveCandidates.Add(block.gameObject);
@@ -387,13 +386,17 @@ public class Field : MonoBehaviour
         {
             return 0;
         }
-        GameObject topRow = blockRows.get(posY + 1);  //TODO Auch checken, ob der Block disabled ist
+        GameObject topRow = blockRows.get(posY + 1);
         if (topRow == null)
         {
             return 0;
         }
 
         Block topNeighbor = topRow.GetComponent<BlockRow>().get(posX).GetComponent<Block>();
+        if(topNeighbor.isDisabled())
+        {
+            return 0;
+        }
 
         if (topNeighbor.getBlockColor() == colorToLookFor)
         {
@@ -413,11 +416,16 @@ public class Field : MonoBehaviour
             return 0;
         }
         GameObject botRow = blockRows.get(posY - 1);
-        if(botRow == null) //TODO Auch checken, ob der Block disabled ist
+        if(botRow == null)
         {
             return 0;
         }
         Block botNeighbor = botRow.GetComponent<BlockRow>().get(posX).GetComponent<Block>();
+
+        if(botNeighbor.isDisabled())
+        {
+            return 0;
+        }
 
         if (botNeighbor.getBlockColor() == colorToLookFor)
         {
@@ -438,6 +446,11 @@ public class Field : MonoBehaviour
         }
         Block leftNeighbor = blockRows.get(posY).GetComponent<BlockRow>().get(posX - 1).GetComponent<Block>(); //TODO Auch checken, ob der Block disabled ist
 
+        if(leftNeighbor.isDisabled())
+        {
+            return 0;
+        }
+
         if (leftNeighbor.getBlockColor() == colorToLookFor)
         {
             solveCandidates.Add(leftNeighbor.gameObject);
@@ -455,6 +468,11 @@ public class Field : MonoBehaviour
             return 0;
         }
         Block rightNeighbor = blockRows.get(posY).GetComponent<BlockRow>().get(posX + 1).GetComponent<Block>(); //TODO Auch checken, ob der Block disabled ist
+
+        if(rightNeighbor.isDisabled())
+        {
+            return 0;
+        }
 
         if (rightNeighbor.getBlockColor() == colorToLookFor)
         {

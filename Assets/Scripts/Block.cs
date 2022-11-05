@@ -28,13 +28,11 @@ public class Block : MonoBehaviour
     public void disable()
     {
         this.disabled = true;
-        greyOut();
     }
 
     public void enable()
     {
         this.disabled = false;
-        removeGreyOut();
     }
 
     public int getX()
@@ -80,7 +78,7 @@ public class Block : MonoBehaviour
         this.renderer.material.color = new Color(1, 1, 1, 0.3f);
     }
 
-    private void removeGreyOut()
+    public void removeGreyOut()
     {
         this.renderer.material.color = new Color(1, 1, 1, 1);
     }
@@ -89,6 +87,7 @@ public class Block : MonoBehaviour
     void Start()
     {
         this.renderer = GetComponent<Renderer>();
+        this.greyOut();
         this.disable();
     }
 }
