@@ -73,7 +73,7 @@ public class Block : MonoBehaviour
         this.renderer.material.color = new Color(1, 1, 1, 0f);
     }
 
-    private void greyOut()
+    public void greyOut()   //TODO: Spaeter wieder auf private
     {
         this.renderer.material.color = new Color(1, 1, 1, 0.3f);
     }

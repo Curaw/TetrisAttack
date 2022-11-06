@@ -303,7 +303,7 @@ public class Field : MonoBehaviour
             Block block = item.GetComponent<Block>();
             Debug.Log(block.getX() + ", " + block.getY());
         }
-        disableSolvedBlocks();
+        emptySolvedBlocks();
     }
     private void handleBlockSolvingforRow(int posY)
     {
@@ -314,7 +314,7 @@ public class Field : MonoBehaviour
             checkForSolvedBlocks(i, posY);
         }
         solvedBlocks.Sort(compareBlockPositions);
-        disableSolvedBlocks();
+        emptySolvedBlocks();
     }
 
     private int compareBlockPositions(GameObject go1, GameObject go2)
@@ -340,13 +340,26 @@ public class Field : MonoBehaviour
         return 1;
     }
 
-    private void disableSolvedBlocks()
+    private void emptySolvedBlocks()
     {
-        foreach (GameObject block in solvedBlocks)
+        Block block = null;
+        int blockYPos = 0;
+        int blockXPos = 0;
+        foreach (GameObject blockGO in solvedBlocks)
         {
-            block.GetComponent<Block>().setBlockColor(BlockColor.Empty);
+            block = blockGO.GetComponent<Block>();
+            blockYPos = block.getY();
+            blockXPos = block.getX();
+
+            block.setBlockColor(BlockColor.Empty);
             //Debug.Log("Block gone: " + block.gameObject.transform.position.x + ", " + block.gameObject.transform.position.y);
-            //block.GetComponent<Block>().disable();
+            //block.disable();
+            //Wenn der obere Block nicht disabled ist, dann faellt er runter
+            //TODO: IndexOutOfBounds abfangen
+            if(!blockRows.get(blockYPos + 1).GetComponent<BlockRow>().get(blockXPos).GetComponent<Block>().isDisabled())
+            {
+                blockRows.get(blockYPos + 1).GetComponent<BlockRow>().get(blockXPos).GetComponent<Block>().greyOut();
+            }
         }
     }
 
