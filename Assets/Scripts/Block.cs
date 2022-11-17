@@ -9,6 +9,7 @@ public class Block : MonoBehaviour
     private Renderer renderer;
     private bool disabled;
     private bool falling = false;
+    private bool swapping = false;
     private int length;
     private int height;
     [SerializeField] private int posX;
@@ -31,6 +32,11 @@ public class Block : MonoBehaviour
         return falling;
     }
 
+    public bool isSwapping()
+    {
+        return swapping;
+    }
+
     public void disable()
     {
         this.disabled = true;
@@ -39,6 +45,11 @@ public class Block : MonoBehaviour
     public void setFalling(bool newVal)
     {
         this.falling = newVal;
+    }
+
+    public void setSwapping(bool newVal)
+    {
+        this.swapping = newVal;
     }
 
     public void enable()

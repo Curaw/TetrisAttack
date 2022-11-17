@@ -79,8 +79,8 @@ public class BlockRow : MonoBehaviour
         data[index].GetComponent<Block>().enable();
         data[index + 1].GetComponent<Block>().enable();
 
-        Debug.Log("neuer linker block: " + data[index].GetComponent<Block>().getX() + ", " + data[index].GetComponent<Block>().getY());
-        Debug.Log("neuer rechter block: " + data[index + 1].GetComponent<Block>().getX() + ", " + data[index + 1].GetComponent<Block>().getY());
+        //Debug.Log("neuer linker block: " + data[index].GetComponent<Block>().getX() + ", " + data[index].GetComponent<Block>().getY());
+        //Debug.Log("neuer rechter block: " + data[index + 1].GetComponent<Block>().getX() + ", " + data[index + 1].GetComponent<Block>().getY());
         this.containingField.handleBlockSolvingAfterSwap(index, this.posY);
     }
 
@@ -93,16 +93,18 @@ public class BlockRow : MonoBehaviour
 
         this.rightSwappingBlock = data[index].GetComponent<Block>();
         this.leftSwappingBlock = data[index + 1].GetComponent<Block>();
-        //this.rightSwappingBlock.setFalling(false);
-        //this.leftSwappingBlock.setFalling(false);
 
         if(this.rightSwappingBlock.isDisabled() || this.leftSwappingBlock.isDisabled())
         {
             return;
         }
+        isSwapInProgress = true;
+        this.rightSwappingBlock.setSwapping(true);
+        this.rightSwappingBlock.setFalling(false);
+        this.leftSwappingBlock.setSwapping(true);
+        this.leftSwappingBlock.setFalling(false);
         this.rightSwappingBlock.disable();
         this.leftSwappingBlock.disable();
-        isSwapInProgress = true;
     }
 
     public void updateBlockPositionValues()
@@ -140,8 +142,10 @@ public class BlockRow : MonoBehaviour
                 animationCounter++;
                 if (animationCounter >= ANIMATION_STEPS)
                 {
-                    isSwapInProgress = false;
                     animationCounter = 0;
+                    leftSwappingBlock.setSwapping(false);
+                    rightSwappingBlock.setSwapping(false);
+                    isSwapInProgress = false;
                     swap(this.rightSwappingBlock.getX());
                 }
             }

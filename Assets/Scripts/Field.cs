@@ -304,7 +304,7 @@ public class Field : MonoBehaviour
         foreach (GameObject item in solvedBlocks)
         {
             Block block = item.GetComponent<Block>();
-            Debug.Log(block.getX() + ", " + block.getY());
+            //Debug.Log(block.getX() + ", " + block.getY());
         }
         emptySolvedBlocks();
 
@@ -556,13 +556,13 @@ public class Field : MonoBehaviour
         Block lowerBlock = null;
         List<GameObject> finishedBlocks = new List<GameObject>();
         foreach (GameObject obj in fallingBlocks) {
-            //if(obj == null)
-            //{
-            //    continue;
-            //}
+            if(obj == null)
+            {
+                continue;
+            }
             currentBlock = obj.GetComponent<Block>();
             lowerBlock = blockRows.get(currentBlock.getY() - 1).GetComponent<BlockRow>().get(currentBlock.getX()).GetComponent<Block>();
-            if (lowerBlock.getBlockColor() != BlockColor.Empty && lowerBlock.isFalling() == false)
+            if (!currentBlock.isFalling() || lowerBlock.isSwapping() || (lowerBlock.getBlockColor() != BlockColor.Empty && !lowerBlock.isFalling()))
             {
                 finishedBlocks.Add(obj);
                 continue;
