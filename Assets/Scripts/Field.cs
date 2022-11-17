@@ -564,6 +564,7 @@ public class Field : MonoBehaviour
             lowerBlock = blockRows.get(currentBlock.getY() - 1).GetComponent<BlockRow>().get(currentBlock.getX()).GetComponent<Block>();
             if (!currentBlock.isFalling() || lowerBlock.isSwapping() || (lowerBlock.getBlockColor() != BlockColor.Empty && !lowerBlock.isFalling()))
             {
+                currentBlock.setFalling(false);
                 finishedBlocks.Add(obj);
                 continue;
             }
@@ -581,7 +582,6 @@ public class Field : MonoBehaviour
     {
         foreach(GameObject obj in finishedBlocks)
         {
-            obj.GetComponent<Block>().setFalling(false);
             fallingBlocks.Remove(obj);
         }
     }
@@ -590,6 +590,7 @@ public class Field : MonoBehaviour
     {
         BlockRow upperBlockRow = blockRows.get(blockToDecrease.getY()).GetComponent<BlockRow>();
         BlockRow lowerBlockRow = blockRows.get(blockToDecrease.getY() -1).GetComponent<BlockRow>();
+
         if(upperBlockRow != null && lowerBlockRow != null)
         {
             //Grafiken und interne Werte vom Block anpassen
