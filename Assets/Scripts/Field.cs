@@ -20,9 +20,11 @@ public class Field : MonoBehaviour
     private BlockRow lastCreatedRow;
     private List<GameObject> solveCandidates;
     private List<GameObject> solvedBlocks;
+    private List<GameObject> fallingBlocks;
     private int fieldComboCounter = 1;
 
     private const float ONE_PIXEL_UNIT = 0.0625f;
+    private const float FALLDOWN_DELTA = 0.1f;
 
     // Start is called before the first frame update
     void Start()
@@ -31,6 +33,7 @@ public class Field : MonoBehaviour
         this.blockRows = new Headarray<GameObject>(height);
         this.solveCandidates = new List<GameObject>();
         this.solvedBlocks = new List<GameObject>();
+        this.fallingBlocks = new List<GameObject>();
     }
 
     public void activateLastRow()
@@ -304,6 +307,9 @@ public class Field : MonoBehaviour
             Debug.Log(block.getX() + ", " + block.getY());
         }
         emptySolvedBlocks();
+
+        noticeFallDown(posX, posY);
+        noticeFallDown(posX + 1, posY);
     }
     private void handleBlockSolvingforRow(int posY)
     {
@@ -354,13 +360,50 @@ public class Field : MonoBehaviour
             block.setBlockColor(BlockColor.Empty);
             //Debug.Log("Block gone: " + block.gameObject.transform.position.x + ", " + block.gameObject.transform.position.y);
             //block.disable();
-            //Wenn der obere Block nicht disabled ist, dann faellt er runter
-            //TODO: IndexOutOfBounds abfangen
-            if(!blockRows.get(blockYPos + 1).GetComponent<BlockRow>().get(blockXPos).GetComponent<Block>().isDisabled())
+            if(blockRows.get(blockYPos + 1) != null)
             {
-                blockRows.get(blockYPos + 1).GetComponent<BlockRow>().get(blockXPos).GetComponent<Block>().greyOut();
+                noticeFallDown(blockRows.get(blockYPos + 1).GetComponent<BlockRow>().get(blockXPos).GetComponent<Block>());
             }
         }
+    }
+
+    private void noticeFallDown(int x, int y)
+    {
+        if(y < this.height && blockRows.get(y) != null)
+        {
+            Block block = blockRows.get(y).GetComponent<BlockRow>().get(x).GetComponent<Block>();
+            if(block.getBlockColor() == BlockColor.Empty)
+            {
+                noticeFallDown(x, y + 1);
+            } else
+            {
+                noticeFallDown(block);
+            }
+        }
+    }
+
+    private void noticeFallDown(Block blockToCheck)
+    {
+        if(blockToCheck == null)
+        {
+            return;
+        }
+        if (!blockToCheck.isDisabled() && blockToCheck.getBlockColor() != BlockColor.Empty)
+        {
+            blockToCheck.setFallDownTimer(FALLDOWN_DELTA);
+            blockToCheck.setFalling(true);
+            this.fallingBlocks.Add(blockToCheck.gameObject);
+            int yIndex = blockToCheck.getY() + 1;
+            if(yIndex >= this.height)
+            {
+                return;
+            }
+            if (blockRows.get(yIndex) != null)
+            {
+                noticeFallDown(blockRows.get(blockToCheck.getY() + 1).GetComponent<BlockRow>().get(blockToCheck.getX()).GetComponent<Block>());
+            }
+        }
+        return;
     }
 
     private void checkForSolvedBlocks(int blockX, int blockY)
@@ -369,6 +412,10 @@ public class Field : MonoBehaviour
         solveCandidates.Clear();
         BlockRow blockRow = blockRows.get(blockY).GetComponent<BlockRow>();
         Block block = blockRow.get(blockX).GetComponent<Block>();
+        if(block.getBlockColor() == BlockColor.Empty)
+        {
+            return;
+        }
         solveCandidates.Add(block.gameObject);
 
         //Block horizontal checken
@@ -503,9 +550,74 @@ public class Field : MonoBehaviour
         }
     }
 
+    private void updateFallingBlocks()
+    {
+        Block currentBlock = null;
+        Block lowerBlock = null;
+        List<GameObject> finishedBlocks = new List<GameObject>();
+        foreach (GameObject obj in fallingBlocks) {
+            //if(obj == null)
+            //{
+            //    continue;
+            //}
+            currentBlock = obj.GetComponent<Block>();
+            lowerBlock = blockRows.get(currentBlock.getY() - 1).GetComponent<BlockRow>().get(currentBlock.getX()).GetComponent<Block>();
+            if (lowerBlock.getBlockColor() != BlockColor.Empty && lowerBlock.isFalling() == false)
+            {
+                finishedBlocks.Add(obj);
+                continue;
+            }
+            currentBlock.setFallDownTimer(currentBlock.getFallDownTimer() - Time.deltaTime);
+            if(currentBlock.getFallDownTimer() <= 0)
+            {
+                currentBlock.setFallDownTimer(FALLDOWN_DELTA);
+                swapBlockWithLowerNeighbor(currentBlock);
+            }
+        }
+        removeAllLandedBlocksFromFallingList(finishedBlocks);
+    }
+
+    private void removeAllLandedBlocksFromFallingList(List<GameObject> finishedBlocks)
+    {
+        foreach(GameObject obj in finishedBlocks)
+        {
+            obj.GetComponent<Block>().setFalling(false);
+            fallingBlocks.Remove(obj);
+        }
+    }
+
+    private void swapBlockWithLowerNeighbor(Block blockToDecrease)
+    {
+        BlockRow upperBlockRow = blockRows.get(blockToDecrease.getY()).GetComponent<BlockRow>();
+        BlockRow lowerBlockRow = blockRows.get(blockToDecrease.getY() -1).GetComponent<BlockRow>();
+        if(upperBlockRow != null && lowerBlockRow != null)
+        {
+            //Grafiken und interne Werte vom Block anpassen
+            Block upperBlock = blockToDecrease;
+            Block lowerBlock = lowerBlockRow.get(blockToDecrease.getX()).GetComponent<Block>();
+
+            upperBlock.transform.SetParent(lowerBlockRow.transform);
+            lowerBlock.transform.SetParent(upperBlockRow.transform);
+
+            upperBlock.setY(upperBlock.getY() - 1);
+            lowerBlock.setY(lowerBlock.getY() + 1);
+
+            //BlockColor tempColor = upperBlock.getBlockColor();
+            //upperBlock.setBlockColor(lowerBlock.getBlockColor());
+            //lowerBlock.setBlockColor(tempColor);
+            upperBlock.transform.localPosition = new Vector3(upperBlock.getX(), 0, 0);
+            lowerBlock.transform.localPosition = new Vector3(lowerBlock.getX(), 0, 0);
+
+            //Interne Werte der Reihe anpassen
+            upperBlockRow.set(blockToDecrease.getX(), lowerBlock.gameObject);
+            lowerBlockRow.set(blockToDecrease.getX(), upperBlock.gameObject);
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
+        updateFallingBlocks();
         //TODO ranges festlegen. koennte das field hier selbst entscheiden und die pos nur aendern, wenn es noch im feld ist
         if (Input.GetKeyDown("w"))
         {

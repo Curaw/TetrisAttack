@@ -10,7 +10,7 @@ public class BlockRow : MonoBehaviour
 
     private Field containingField;
     private GameObject[] data;
-    private int posY = 0;
+    [SerializeField] private int posY = 0;
     private int width = 0;
     private bool isSwapInProgress = false;
     private Block leftSwappingBlock, rightSwappingBlock;
@@ -93,6 +93,8 @@ public class BlockRow : MonoBehaviour
 
         this.rightSwappingBlock = data[index].GetComponent<Block>();
         this.leftSwappingBlock = data[index + 1].GetComponent<Block>();
+        //this.rightSwappingBlock.setFalling(false);
+        //this.leftSwappingBlock.setFalling(false);
 
         if(this.rightSwappingBlock.isDisabled() || this.leftSwappingBlock.isDisabled())
         {

@@ -8,10 +8,12 @@ public class Block : MonoBehaviour
 
     private Renderer renderer;
     private bool disabled;
+    private bool falling = false;
     private int length;
     private int height;
-    private int posX;
-    private int posY;
+    [SerializeField] private int posX;
+    [SerializeField] private int posY;
+    private float fallDownTimer = 0;
 
     public Block(BlockColor color)
     {
@@ -24,10 +26,19 @@ public class Block : MonoBehaviour
     {
         return disabled;
     }
+    public bool isFalling()
+    {
+        return falling;
+    }
 
     public void disable()
     {
         this.disabled = true;
+    }
+
+    public void setFalling(bool newVal)
+    {
+        this.falling = newVal;
     }
 
     public void enable()
@@ -44,6 +55,10 @@ public class Block : MonoBehaviour
     {
         return this.posY;
     }
+    public float getFallDownTimer()
+    {
+        return this.fallDownTimer;
+    }
 
     public void setPosition(int x, int y)
     {
@@ -59,6 +74,11 @@ public class Block : MonoBehaviour
     public void setY(int newY)
     {
         this.posY = newY;
+    }
+
+    public void setFallDownTimer(float newVal)
+    {
+        this.fallDownTimer = newVal;
     }
 
     public BlockColor getBlockColor()
