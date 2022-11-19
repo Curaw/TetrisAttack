@@ -24,7 +24,7 @@ public class Field : MonoBehaviour
     private int fieldComboCounter = 1;
 
     private const float ONE_PIXEL_UNIT = 0.0625f;
-    private const float FALLDOWN_DELTA = 0.1f;
+    private const float FALLDOWN_DELTA = 0.02f;
 
     // Start is called before the first frame update
     void Start()
@@ -295,21 +295,17 @@ public class Field : MonoBehaviour
         //blockRows.get(roundedY).GetComponent<BlockRow>().swap(roundedX);
     }
 
-    public void handleBlockSolvingAfterSwap(int posX, int posY)
+    public void handleBlockSolvingAtPosition(int posX, int posY)
     {
         solvedBlocks.Clear();
         checkForSolvedBlocks(posX, posY);
-        checkForSolvedBlocks(posX + 1, posY);
         solvedBlocks.Sort(compareBlockPositions); //TODO: Hier die kacksortierung
-        foreach (GameObject item in solvedBlocks)
-        {
-            Block block = item.GetComponent<Block>();
-            //Debug.Log(block.getX() + ", " + block.getY());
-        }
+        //foreach (GameObject item in solvedBlocks)
+        //{
+        //    Block block = item.GetComponent<Block>();
+        //    //Debug.Log(block.getX() + ", " + block.getY());
+        //}
         emptySolvedBlocks();
-
-        noticeFallDown(posX, posY);
-        noticeFallDown(posX + 1, posY);
     }
     private void handleBlockSolvingforRow(int posY)
     {
@@ -346,6 +342,43 @@ public class Field : MonoBehaviour
         return 1;
     }
 
+    public void handleLogicAfterSwap(int x, int y)
+    {
+        if (isBlockSupposedToFall(x, y))
+        {
+            blockRows.get(y).GetComponent<BlockRow>().get(x).GetComponent<Block>().setLevitating(true);
+        }
+        else
+        {
+            handleBlockSolvingAtPosition(x, y);
+        }
+
+        if (isBlockSupposedToFall(x + 1, y))
+        {
+            blockRows.get(y).GetComponent<BlockRow>().get(x + 1).GetComponent<Block>().setLevitating(true);
+        }
+        else
+        {
+            handleBlockSolvingAtPosition(x + 1, y);
+        }
+        noticeFallDown(x, y);
+        noticeFallDown(x + 1, y);
+    }
+    private bool isBlockSupposedToFall(int x, int y)
+    {
+        GameObject rowGo = blockRows.get(y - 1);
+        if(rowGo == null)
+        {
+            return false;
+        }
+        BlockRow row = rowGo.GetComponent<BlockRow>();
+        if(row == null)
+        {
+            return false;
+        }
+        return row.get(x).GetComponent<Block>().getBlockColor() == BlockColor.Empty;
+    }
+
     private void emptySolvedBlocks()
     {
         Block block = null;
@@ -369,7 +402,7 @@ public class Field : MonoBehaviour
 
     private void noticeFallDown(int x, int y)
     {
-        if(y < this.height && blockRows.get(y) != null)
+        if(y < this.height && x < this.width && blockRows.get(y) != null)
         {
             Block block = blockRows.get(y).GetComponent<BlockRow>().get(x).GetComponent<Block>();
             if(block.getBlockColor() == BlockColor.Empty)
@@ -640,5 +673,11 @@ public class Field : MonoBehaviour
         {
             swapBlocksAtCursorPosition();
         }
+
+        //50 FPS
+        //1 Frame = 0,02 Sekunden
+        //4 Frames zum Swappen
+        //13 Frames bis zum Runterfallen nach dem Swap (9 Coyote Frames)
+        //Beim Fallen: 1 Frame --> 1 Reihe tiefer
     }
 }

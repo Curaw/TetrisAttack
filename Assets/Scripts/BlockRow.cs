@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class BlockRow : MonoBehaviour
 {
-    private const float ANIMATION_DELTA = 0.1f;
-    private const float ANIMATION_OFFSET_X = 0.125f;
-    private const int ANIMATION_STEPS = 8;
+    private const float ANIMATION_DELTA = 0.02f;
+    private const float ANIMATION_OFFSET_X = 0.25f;
+    private const int ANIMATION_STEPS = 4;
 
     private Field containingField;
     private GameObject[] data;
@@ -81,7 +81,9 @@ public class BlockRow : MonoBehaviour
 
         //Debug.Log("neuer linker block: " + data[index].GetComponent<Block>().getX() + ", " + data[index].GetComponent<Block>().getY());
         //Debug.Log("neuer rechter block: " + data[index + 1].GetComponent<Block>().getX() + ", " + data[index + 1].GetComponent<Block>().getY());
-        this.containingField.handleBlockSolvingAfterSwap(index, this.posY);
+
+        //TODO Das hier kann alles das Field machen
+        this.containingField.handleLogicAfterSwap(index, this.posY);
     }
 
     public void initSwap(int index)
@@ -126,29 +128,34 @@ public class BlockRow : MonoBehaviour
         }
     }
 
+    private void handleSwapping()
+    {
+        lastUpdate += Time.deltaTime;
+        if (lastUpdate >= ANIMATION_DELTA)
+        {
+            lastUpdate = 0;
+            Vector3 newBlockDrawPos = new Vector3(rightSwappingBlock.transform.position.x + ANIMATION_OFFSET_X, rightSwappingBlock.transform.position.y, rightSwappingBlock.transform.position.z);
+            rightSwappingBlock.transform.position = newBlockDrawPos;
+            newBlockDrawPos = new Vector3(leftSwappingBlock.transform.position.x + ANIMATION_OFFSET_X * -1, leftSwappingBlock.transform.position.y, leftSwappingBlock.transform.position.z);
+            leftSwappingBlock.transform.position = newBlockDrawPos;
+            animationCounter++;
+            if (animationCounter >= ANIMATION_STEPS)
+            {
+                animationCounter = 0;
+                leftSwappingBlock.setSwapping(false);
+                rightSwappingBlock.setSwapping(false);
+                isSwapInProgress = false;
+                swap(this.rightSwappingBlock.getX());
+            }
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
         if (isSwapInProgress)
         {
-            lastUpdate += Time.fixedDeltaTime;
-            if (lastUpdate >= ANIMATION_DELTA)
-            {
-                lastUpdate = 0;
-                Vector3 newBlockDrawPos = new Vector3(rightSwappingBlock.transform.position.x + ANIMATION_OFFSET_X, rightSwappingBlock.transform.position.y, rightSwappingBlock.transform.position.z);
-                rightSwappingBlock.transform.position = newBlockDrawPos;
-                newBlockDrawPos = new Vector3(leftSwappingBlock.transform.position.x + ANIMATION_OFFSET_X * -1, leftSwappingBlock.transform.position.y, leftSwappingBlock.transform.position.z);
-                leftSwappingBlock.transform.position = newBlockDrawPos;
-                animationCounter++;
-                if (animationCounter >= ANIMATION_STEPS)
-                {
-                    animationCounter = 0;
-                    leftSwappingBlock.setSwapping(false);
-                    rightSwappingBlock.setSwapping(false);
-                    isSwapInProgress = false;
-                    swap(this.rightSwappingBlock.getX());
-                }
-            }
+            handleSwapping();
         }
     }
 }
