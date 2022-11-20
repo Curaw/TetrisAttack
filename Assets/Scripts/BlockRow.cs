@@ -100,6 +100,16 @@ public class BlockRow : MonoBehaviour
         {
             return;
         }
+
+        if(this.rightSwappingBlock.getBlockColor() == BlockColor.Empty && this.containingField.getCoyoteBlockColumn() == this.rightSwappingBlock.getX())
+        {
+            return;
+        }
+
+        if (this.leftSwappingBlock.getBlockColor() == BlockColor.Empty && this.containingField.getCoyoteBlockColumn() == this.leftSwappingBlock.getX())
+        {
+            return;
+        }
         isSwapInProgress = true;
         this.rightSwappingBlock.setSwapping(true);
         this.rightSwappingBlock.setFalling(false);

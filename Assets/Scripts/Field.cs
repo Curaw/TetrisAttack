@@ -18,6 +18,8 @@ public class Field : MonoBehaviour
     private Headarray<GameObject> blockRows;
     private Cursor cursorScript;
     private BlockRow lastCreatedRow;
+    [SerializeField] private Block coyoteBlock;
+
     private List<GameObject> solveCandidates;
     private List<GameObject> solvedBlocks;
     private List<GameObject> fallingBlocks;
@@ -25,6 +27,7 @@ public class Field : MonoBehaviour
 
     private const float ONE_PIXEL_UNIT = 0.0625f;
     private const float FALLDOWN_DELTA = 0.02f;
+    private const float COYOTE_TIME = 0.18f;
 
     // Start is called before the first frame update
     void Start()
@@ -34,6 +37,15 @@ public class Field : MonoBehaviour
         this.solveCandidates = new List<GameObject>();
         this.solvedBlocks = new List<GameObject>();
         this.fallingBlocks = new List<GameObject>();
+    }
+
+    public int getCoyoteBlockColumn()
+    {
+        if(coyoteBlock == null)
+        {
+            return -1;
+        }
+        return this.coyoteBlock.getX();
     }
 
     public void activateLastRow()
@@ -346,23 +358,29 @@ public class Field : MonoBehaviour
     {
         if (isBlockSupposedToFall(x, y))
         {
-            blockRows.get(y).GetComponent<BlockRow>().get(x).GetComponent<Block>().setLevitating(true);
+            this.coyoteBlock = blockRows.get(y).GetComponent<BlockRow>().get(x).GetComponent<Block>();
+            this.coyoteBlock.disable();
+            this.coyoteBlock.setFallDownTimer(COYOTE_TIME);
+            this.coyoteBlock.setLevitating(true);
         }
         else
         {
             handleBlockSolvingAtPosition(x, y);
+            noticeFallDown(x, y);
         }
 
         if (isBlockSupposedToFall(x + 1, y))
         {
-            blockRows.get(y).GetComponent<BlockRow>().get(x + 1).GetComponent<Block>().setLevitating(true);
+            this.coyoteBlock = blockRows.get(y).GetComponent<BlockRow>().get(x + 1).GetComponent<Block>();
+            this.coyoteBlock.disable();
+            this.coyoteBlock.setFallDownTimer(COYOTE_TIME);
+            this.coyoteBlock.setLevitating(true);
         }
         else
         {
             handleBlockSolvingAtPosition(x + 1, y);
+            noticeFallDown(x + 1, y);
         }
-        noticeFallDown(x, y);
-        noticeFallDown(x + 1, y);
     }
     private bool isBlockSupposedToFall(int x, int y)
     {
@@ -595,9 +613,10 @@ public class Field : MonoBehaviour
             }
             currentBlock = obj.GetComponent<Block>();
             lowerBlock = blockRows.get(currentBlock.getY() - 1).GetComponent<BlockRow>().get(currentBlock.getX()).GetComponent<Block>();
-            if (!currentBlock.isFalling() || lowerBlock.isSwapping() || (lowerBlock.getBlockColor() != BlockColor.Empty && !lowerBlock.isFalling()))
+            if (lowerBlock.isSwapping() || (lowerBlock.getBlockColor() != BlockColor.Empty && !lowerBlock.isFalling()))
             {
                 currentBlock.setFalling(false);
+                currentBlock.enable();
                 finishedBlocks.Add(obj);
                 continue;
             }
@@ -648,9 +667,29 @@ public class Field : MonoBehaviour
         }
     }
 
+    private void updateCoyoteBlock()
+    {
+        if(this.coyoteBlock == null)
+        {
+            return;
+        }
+        this.coyoteBlock.setFallDownTimer(this.coyoteBlock.getFallDownTimer() - Time.deltaTime);
+        Debug.Log(this.coyoteBlock.getFallDownTimer());
+        if(this.coyoteBlock.getFallDownTimer() <= 0)
+        {
+            Debug.Log("Coyote time done");
+            this.coyoteBlock.setLevitating(false);
+            this.coyoteBlock.setFalling(true);
+            this.coyoteBlock.setFallDownTimer(FALLDOWN_DELTA);
+            this.fallingBlocks.Add(this.coyoteBlock.gameObject);
+            this.coyoteBlock = null;
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
+        updateCoyoteBlock();
         updateFallingBlocks();
         //TODO ranges festlegen. koennte das field hier selbst entscheiden und die pos nur aendern, wenn es noch im feld ist
         if (Input.GetKeyDown("w"))
